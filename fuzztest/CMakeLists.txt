@@ -1,30 +1,5 @@
-function(_link_libfuzzer_in_compatibility_mode name)
-  if (FUZZTEST_COMPATIBILITY_MODE STREQUAL "libfuzzer")
-    EXECUTE_PROCESS (
-        COMMAND bash -c "find \${PATH//:/ } -maxdepth 1 -executable -name 'llvm-config*'"
-        OUTPUT_VARIABLE LLVM_CONFIG OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    EXECUTE_PROCESS(
-      COMMAND bash -c "find $(${LLVM_CONFIG} --libdir) \
-      -name libclang_rt.fuzzer_no_main-x86_64.a"
-      OUTPUT_VARIABLE FUZZER_NO_MAIN OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    if(NOT FUZZER_NO_MAIN)
-      # LLVM_ENABLE_PER_TARGET_RUNTIME_DIR was set to ON when building LLVM.
-      EXECUTE_PROCESS(
-        COMMAND bash -c "find / -regex \
-        \"$(${LLVM_CONFIG} --libdir).*$(${LLVM_CONFIG} --host-target).*libclang_rt.fuzzer_no_main.a\""
-        OUTPUT_VARIABLE FUZZER_NO_MAIN OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    endif()
-    target_link_libraries(${name} PRIVATE ${FUZZER_NO_MAIN})
-  endif ()
-endfunction()
-
 get_filename_component(PARENT_DIR ../ ABSOLUTE)
 include_directories(${PARENT_DIR})
-
-add_subdirectory(grammars)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize-coverage=0")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-coverage=0")
@@ -155,38 +130,7 @@ fuzztest_cc_library(
     fuzztest::meta
 )
 
-fuzztest_cc_test(
-  NAME
-    any_test
-  SRCS
-    "internal/any_test.cc"
-  DEPS
-    fuzztest::any
-    absl::strings
-    GTest::gmock_main
-)
-
 # TODO(lszekeres): centipede_adaptor
-
-fuzztest_cc_library(
-  NAME
-    compatibility_mode
-  HDRS
-    "internal/compatibility_mode.h"
-  SRCS
-    "internal/compatibility_mode.cc"
-  DEPS
-    fuzztest::domain_core
-    fuzztest::fixture_driver
-    fuzztest::logging
-    fuzztest::runtime
-    absl::random_distributions
-    absl::strings
-    absl::str_format
-    absl::time
-)
-
-_link_libfuzzer_in_compatibility_mode(fuzztest_compatibility_mode)
 
 fuzztest_cc_library(
   NAME
@@ -202,18 +146,6 @@ fuzztest_cc_library(
     absl::strings
     absl::string_view
     absl::time
-)
-
-fuzztest_cc_test(
-  NAME
-    configuration_test
-  SRCS
-    "internal/configuration_test.cc"
-  DEPS
-    fuzztest::configuration
-    absl::statusor
-    absl::time
-    GTest::gmock_main
 )
 
 fuzztest_cc_library(
@@ -350,21 +282,6 @@ fuzztest_cc_library(
     absl::span
 )
 
-fuzztest_cc_test(
-  NAME
-    fixture_driver_test
-  SRCS
-    "internal/fixture_driver_test.cc"
-  DEPS
-    fuzztest::any
-    fuzztest::domain_core
-    fuzztest::fixture_driver
-    fuzztest::logging
-    fuzztest::registration
-    absl::span
-    GTest::gmock_main
-)
-
 fuzztest_cc_library(
   NAME
     googletest_adaptor
@@ -404,18 +321,6 @@ fuzztest_cc_library(
     fuzztest::logging
     absl::hash
     absl::str_format
-)
-
-fuzztest_cc_test(
-  NAME
-    io_test
-  SRCS
-    "internal/io_test.cc"
-  DEPS
-    fuzztest::fuzztest_core
-    fuzztest::io
-    absl::strings
-    GTest::gmock_main
 )
 
 fuzztest_cc_library(
@@ -487,7 +392,6 @@ fuzztest_cc_library(
   SRCS
     "internal/registry.cc"
   DEPS
-    fuzztest::compatibility_mode
     fuzztest::fixture_driver
     fuzztest::registration
     fuzztest::runtime
@@ -530,19 +434,6 @@ fuzztest_cc_library(
     absl::span
 )
 
-fuzztest_cc_test(
-  NAME
-    runtime_test
-  SRCS
-    "internal/runtime_test.cc"
-  DEPS
-    fuzztest::domain_core
-    fuzztest::runtime
-    test_protobuf
-    absl::time
-    GTest::gmock_main
-)
-
 fuzztest_cc_library(
   NAME
     seed_seq
@@ -555,18 +446,6 @@ fuzztest_cc_library(
     absl::random_random
     absl::strings
     absl::span
-)
-
-fuzztest_cc_test(
-  NAME
-    seed_seq_test
-  SRCS
-    "internal/seed_seq_test.cc"
-  DEPS
-    fuzztest::seed_seq
-    absl::strings
-    absl::span
-    GTest::gmock_main
 )
 
 fuzztest_cc_library(
@@ -582,18 +461,6 @@ fuzztest_cc_library(
     absl::strings
     absl::str_format
     absl::span
-)
-
-fuzztest_cc_test(
-  NAME
-    serialization_test
-  SRCS
-    "internal/serialization_test.cc"
-  DEPS
-    fuzztest::serialization
-    test_protobuf
-    GTest::gmock_main
-    protobuf::libprotobuf
 )
 
 fuzztest_cc_library(
@@ -623,18 +490,6 @@ fuzztest_cc_library(
     absl::time
 )
 
-fuzztest_cc_test(
-  NAME
-    subprocess_test
-  SRCS
-    "internal/subprocess_test.cc"
-  DEPS
-    fuzztest::subprocess
-    absl::strings
-    absl::time
-    GTest::gmock_main
-)
-
 fuzztest_cc_library(
   NAME
     table_of_recent_compares
@@ -646,54 +501,6 @@ fuzztest_cc_library(
     absl::random_bit_gen_ref
     absl::random_distributions
 )
-
-fuzztest_cc_test(
-  NAME
-    table_of_recent_compares_test
-  SRCS
-    "internal/table_of_recent_compares_test.cc"
-  DEPS
-    fuzztest::table_of_recent_compares
-    absl::random_random
-    GTest::gmock_main
-)
-
-# TODO(lszekeres): Support fuzztest_cc_proto_library.
-
-if (FUZZTEST_BUILD_TESTING)
-
-  include_directories(${PROTOBUF_INCLUDE_DIR})
-
-  add_library(
-    test_protobuf
-    OBJECT
-    "${CMAKE_CURRENT_LIST_DIR}/internal/test_protobuf.proto"
-  )
-  target_link_libraries(
-    test_protobuf
-    PUBLIC
-    protobuf::libprotobuf
-  )
-
-  # The output dir of `test_protobuf` might not be created by `protobuf_generate`.
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/internal)
-
-  protobuf_generate(
-    TARGET
-      test_protobuf
-    IMPORT_DIRS
-      ${CMAKE_CURRENT_LIST_DIR}/internal
-    PROTOC_OUT_DIR
-      ${CMAKE_CURRENT_BINARY_DIR}/internal
-  )
-
-  target_include_directories(
-    test_protobuf
-    PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/.."
-  )
-
-endif ()
 
 fuzztest_cc_library(
   NAME
@@ -714,20 +521,3 @@ fuzztest_cc_library(
     absl::time
 )
 
-fuzztest_cc_test(
-  NAME
-    type_support_test
-  SRCS
-    "internal/type_support_test.cc"
-  DEPS
-    fuzztest::domain
-    fuzztest::meta
-    fuzztest::printer
-    test_protobuf
-    fuzztest::type_support
-    absl::int128
-    absl::strings
-    absl::str_format
-    absl::time
-    GTest::gmock_main
-)

@@ -167,7 +167,3 @@ void TestOneInput(const std::vector<uint8_t>& data) {
   LLVMFuzzerTestOneInput(data.data(), data.size());
 }
 
-FUZZ_TEST(LLVMFuzzer, TestOneInput)
-    .WithDomains(ArbitraryByteVector()
-                     .WithDictionary(ReadByteArrayDictionaryFromFile)
-                     .WithSeeds(ReadByteArraysFromDirectory));

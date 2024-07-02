@@ -342,14 +342,6 @@ class FuzzTestFuzzerImpl : public FuzzTestFuzzer {
   std::optional<Input> minimal_non_fatal_counterexample_;
 
   Runtime& runtime_ = Runtime::instance();
-
-#ifdef FUZZTEST_COMPATIBILITY_MODE
-  friend class FuzzTestExternalEngineAdaptor;
-#endif  // FUZZTEST_COMPATIBILITY_MODE
-  // Defined in centipede_adaptor.cc
-  friend class CentipedeFuzzerAdaptor;
-  friend class CentipedeAdaptorRunnerCallbacks;
-  friend class CentipedeAdaptorEngineCallbacks;
 };
 
 size_t GetStackLimitFromEnvOrConfiguration(const Configuration& configuration);

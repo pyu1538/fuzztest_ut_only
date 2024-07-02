@@ -68,52 +68,6 @@ namespace fuzztest {
 // be specified first.
 #define FUZZ_TEST(suite_name, func) INTERNAL_FUZZ_TEST(suite_name, func)
 
-// The FUZZ_TEST_F macro registers a fuzz test that uses a test fixture.
-//
-// The first parameter is the name of the fixture class, which is also used as
-// the name of the test suite. The second parameter is the name of the property
-// function (also used as the test name), which must be defined as a public
-// member of the fixture class.
-//
-// A test fixture can be any default-constructible class. The fixture's setup
-// code should be in its constructor, and the teardown code should be in its
-// destructor. While running the fuzz test, which involves calling the property
-// function multiple times with various inputs, the fixture will be instantiated
-// only once at the beginning and destroyed at the end of the fuzz test. In
-// particular, the same instance will be used in all calls to the property
-// function.
-//
-// If the fixture you are using is a GoogleTest fixture (i.e., it extends
-// `::testing::Test`, either directly or indirectly), then you will additionally
-// need to wrap the fixture in an adapter. For more details, see
-// https://github.com/google/fuzztest/blob/main/doc/fixtures.md.
-//
-// Just like the FUZZ_TEST macro, the FUZZ_TEST_F macro allows specifying the
-// domains and seeds using the `.WithDomains()` and `.WithSeeds()` clauses.
-//
-// Example:
-//
-//   class FooFuzzTest {
-//    public:
-//     FooFuzzTest() { foo_.SetUp(); }
-//     ~FooFuzzTest() { foo_.TearDown(); }
-//
-//     void CallingFooBarNeverCrashes(int x, const std::string& s) {
-//       bool result = foo_.Bar(x, s);
-//       ASSERT_TRUE(result);
-//     }
-//
-//    private:
-//     Foo foo_;
-//   };
-//   FUZZ_TEST_F(FooFuzzTest, CallingFooBarNeverCrashes)
-//     .WithDomains(/*x:*/fuzztest::Positive<int>(),
-//                  /*s:*/fuzztest::AsciiString())
-//     .WithSeeds({{5, "Foo"}, {10, "Bar"}});
-//
-#define FUZZ_TEST_F(fixture, func) \
-  INTERNAL_FUZZ_TEST_F(fixture, func, fixture, func)
-
 // Reads files as strings from the directory `dir` and returns a vector usable
 // by .WithSeeds().
 //
