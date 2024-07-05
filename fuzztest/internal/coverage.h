@@ -41,6 +41,15 @@
 #include <pthread.h>
 #endif
 
+// yupeng
+#ifdef _MSC_VER
+#include <intrin.h>
+#define __builtin_popcount __popcnt
+#define __builtin_return_address(x) _ReturnAddress()
+#define __builtin_frame_address(x) _AddressOfReturnAddress()
+#define __builtin_clz __lzcnt
+#endif
+
 namespace fuzztest::internal {
 
 // Stack information for a thread under test.
@@ -106,11 +115,11 @@ class ExecutionCoverage {
   }
 
   static char* GetCurrentStackFrame() {
-#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
+//#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
     return reinterpret_cast<char*>(__builtin_frame_address(0));
-#else
-    return nullptr;
-#endif
+//#else
+//    return nullptr;
+//#endif
   }
 
   // The size of cmp coverage maps, it's a randomly picked value. But
