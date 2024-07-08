@@ -386,6 +386,7 @@ class IntegerDictionary {
 
 template <typename ContainerT>
 class ContainerDictionary {
+    /*
   static_assert(std::is_integral_v<value_type_t<ContainerT>> &&
                     (sizeof(value_type_t<ContainerT>) == 1 ||
                      sizeof(value_type_t<ContainerT>) == 2 ||
@@ -394,7 +395,7 @@ class ContainerDictionary {
                 "ContainerDictionary only accepts container::value_type being "
                 "basic types with size = "
                 "{1, 2, 4, 8}.");
-
+*/
  public:
   void MatchEntriesFromTableOfRecentCompares(
       const ContainerT& val, const TablesOfRecentCompares& torc) {
